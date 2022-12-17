@@ -50,9 +50,6 @@ func main() {
 	}
 	quiz.questions = questions
 
-	fmt.Println("--------------------------------")
-	fmt.Println("|------------ Quiz ------------|")
-	fmt.Println("--------------------------------")
 	promptQuizStart()
 
 	done := make(chan interface{})
@@ -62,20 +59,16 @@ func main() {
 
 	go func() {
 		for idx := 0; idx < len(quiz.questions); idx++ {
-			// User finished the quiz
-			if idx >= len(quiz.questions) {
-				close(done)
-				return
-			}
-
 			userSubmission, err := askUserQuestion(quiz.questions[idx])
 			if err != nil {
 				fmt.Println(err)
+				close(done)
 				return
 			}
 			quiz.submissions = append(quiz.submissions, userSubmission)
-
 		}
+		// User finished the quiz
+		close(done)
 	}()
 
 awaitingFinish:
@@ -97,6 +90,9 @@ awaitingFinish:
 }
 
 func promptQuizStart() (bool, error) {
+	fmt.Println("--------------------------------")
+	fmt.Println("|------------ Quiz ------------|")
+	fmt.Println("--------------------------------")
 	fmt.Print("Please press enter to begin the quiz.")
 	ok := SCANNER.Scan()
 	if !ok {
